@@ -4,9 +4,7 @@
  */
 body {
   position: relative;
-  height: 100vh;
-  font-family: sans-serif;
-  overflow-y: hidden;
+  /* overflow-y: hidden; */
 }
 
 li {

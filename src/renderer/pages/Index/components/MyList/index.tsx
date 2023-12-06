@@ -23,7 +23,7 @@ interface UserItem {
 
 const fakeDataUrl =
   'https://randomuser.me/api/?results=20&inc=name,gender,email,nat,picture&noinfo';
-const ContainerHeight = 400;
+const ContainerHeight = 500;
 
 type Iprops = {};
 
