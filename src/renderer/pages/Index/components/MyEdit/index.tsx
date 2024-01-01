@@ -35,7 +35,7 @@ export default function Index(props: Iprops) {
           }
         }
         style={{
-          width: '608px',
+          // width: '608px',
           height: '160px',
           resize: 'none',
           borderRadius: '5px',
