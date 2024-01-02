@@ -15,6 +15,10 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
+import { createDataTable } from './db/database';
+
+// const { createDataTable } = require(‘./db/database.ts’);
+
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -82,6 +86,8 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
+
+  createDataTable();
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
