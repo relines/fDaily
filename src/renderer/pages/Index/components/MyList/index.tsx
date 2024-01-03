@@ -39,6 +39,23 @@ export default function Index(props: Iprops) {
       });
   };
 
+  const getData = async () => {
+    const result = await window.electron.ipcRenderer.invoke(
+      'get-list',
+      'SELECT * FROM user',
+    );
+    console.log(333, result);
+  };
+
+  const addData = async () => {
+    const result = await window.electron.ipcRenderer.invoke('add-data', {
+      name: 'harry',
+      email: '123@qq.com',
+      phone: 130303030303,
+    });
+    console.log(333, result);
+  };
+
   useEffect(() => {
     appendData();
   }, []);
@@ -55,6 +72,22 @@ export default function Index(props: Iprops) {
   return (
     <div className={styles.container}>
       <List>
+        <button
+          type="button"
+          onClick={() => {
+            getData();
+          }}
+        >
+          getList
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            addData();
+          }}
+        >
+          addData
+        </button>
         <VirtualList
           data={data}
           height={ContainerHeight}

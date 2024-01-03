@@ -15,7 +15,7 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
-import { createDataTable } from './db/database';
+import { db, createDataTable } from './db/database';
 
 // const { createDataTable } = require(‘./db/database.ts’);
 
@@ -29,10 +29,59 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
+// 查询
+function query() {
+  return new Promise((resolve, reject) => {
+    db.all('SELECT * FROM user', (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+}
+
+// 新增
+function add(data) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `INSERT INTO user(name, email, phone) VALUES('${data.name}', '${data.email}', '${data.phone}')`,
+      function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(this.lastID);
+        }
+      },
+    );
+  });
+}
+
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+ipcMain.handle('add-data', async (event, message) => {
+  console.log(`receive message from render: ${message}`);
+  const result = add(message);
+  return result;
+});
+
+ipcMain.handle('get-list', async (event, message) => {
+  console.log(`receive message from render: ${message}`);
+  const result = new Promise((resolve, reject) => {
+    db.all(message, (err: any, rows: any) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+  return result;
 });
 
 if (process.env.NODE_ENV === 'production') {
