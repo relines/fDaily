@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
 /**
@@ -32,7 +33,7 @@ let mainWindow: BrowserWindow | null = null;
 // 查询
 function query() {
   return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM user', (err, rows) => {
+    db.all('SELECT * FROM user', (err: any, rows: any) => {
       if (err) {
         reject(err);
       } else {
@@ -43,11 +44,11 @@ function query() {
 }
 
 // 新增
-function add(data) {
+function add(data: any) {
   return new Promise((resolve, reject) => {
     db.run(
       `INSERT INTO user(name, email, phone) VALUES('${data.name}', '${data.email}', '${data.phone}')`,
-      function (err) {
+      function (err: any) {
         if (err) {
           reject(err);
         } else {
