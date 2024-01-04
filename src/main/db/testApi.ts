@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-lonely-if */
 /* eslint-disable prefer-promise-reject-errors */
+import dayjs from 'dayjs';
+
 import conDb from './index';
 
 export default {
@@ -39,18 +41,37 @@ export default {
     const db = conDb();
 
     const createdTime = new Date().getTime();
+    const formatDay = dayjs(new Date()).format('YYYYMMDD');
+    let code = Number(`${formatDay}0001`);
 
     return new Promise((resolve, reject) => {
-      let sql = `INSERT INTO test (content, tag, createdTime) `;
-      sql += `values ("${content}", "${tag}", "${createdTime}")`;
-
-      db.run(sql, (error: any, data: any) => {
-        if (error) {
-          reject({ code: 400, msg: error });
-        } else {
-          resolve({ code: 200, msg: '成功', data });
-        }
-      });
+      db.all(
+        `SELECT * FROM test WHERE code LIKE "${formatDay}%"`,
+        (err: any, list: any) => {
+          if (err) {
+            reject({ code: 400, msg: err, data: [] });
+          } else {
+            if (list.length) {
+              const codeArr = list.map((item: any) => item.code);
+              const maxCode = Math.max(...codeArr);
+              code = maxCode + 1;
+              if (maxCode.toString().slice(-4) === '9999') {
+                resolve({ code: 201, msg: '已经达到9999条数据', data: list });
+              }
+            }
+            db.run(
+              `INSERT INTO test (code, content, tag, createdTime) values ("${code}","${content}", "${tag}", "${createdTime}")`,
+              (error: any, data: any) => {
+                if (error) {
+                  reject({ code: 400, msg: error });
+                } else {
+                  resolve({ code: 200, msg: '成功', data });
+                }
+              },
+            );
+          }
+        },
+      );
     });
   },
   updateTest({ id, content, tag }: any) {

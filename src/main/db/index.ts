@@ -30,9 +30,10 @@ export function init() {
       // 测试数据库
       db.run(`create table if not exists test (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                code int,
+                content varchar(5000),
                 createdTime int,
                 updateTime int,
-                content varchar(5000),
                 tag varchar(2000),
                 uid varchar(1000) DEFAULT null
             )`);
