@@ -22,7 +22,7 @@ export default {
       });
 
       // 实现分页语法
-      let sql = `select * from test`;
+      let sql = `select * from test ORDER BY code DESC`;
       if (tel) {
         sql += ` where tel = "${tel}"`;
       }

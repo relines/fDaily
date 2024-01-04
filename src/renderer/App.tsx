@@ -6,7 +6,7 @@ import IndexCom from './pages/Index';
 function Hello() {
   return (
     <div>
-      <h1>electron-react-boilerplate</h1>
+      <h1>react-boilerplate</h1>
       <IndexCom />
     </div>
   );
