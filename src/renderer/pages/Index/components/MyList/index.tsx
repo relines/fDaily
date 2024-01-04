@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 import React, { useState, useEffect } from 'react';
@@ -18,6 +20,7 @@ type Iprops = {};
 export default function Index(props: Iprops) {
   const [tableData, setTableData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [activeRecord, setActiveRecord] = useState<any>({});
 
   const getData = async () => {
     const result = await window.electron.ipcRenderer.invoke('get-list', '');
@@ -77,7 +80,6 @@ export default function Index(props: Iprops) {
         >
           {(item: any) => (
             <List.Item key={item.email} className={styles.listItem}>
-              {console.log(333, item)}
               <div className={styles.timeLine}>
                 <div className={styles.left}>
                   {dayjs(item.createdTime).format('DD')}
@@ -93,7 +95,14 @@ export default function Index(props: Iprops) {
                 <div className={styles.circle} />
                 <div className={styles.line} />
               </div>
-              <div className={styles.content}>
+              <div
+                className={`${styles.content} ${
+                  activeRecord.code === item.code && styles.activedContent
+                }`}
+                onClick={() => {
+                  setActiveRecord(item);
+                }}
+              >
                 <div className={styles.text}>{item.content}</div>
                 <div className={styles.img}>
                   {/* <Avatar src={item.picture} /> */}
