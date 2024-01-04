@@ -2,72 +2,39 @@
 /* eslint-disable promise/catch-or-return */
 import React, { useState, useEffect } from 'react';
 import VirtualList from 'rc-virtual-list';
-import { Avatar, List, message } from 'antd';
+import { List, message } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
 
 import dayjs from 'dayjs';
 
 import styles from './index.module.less';
 
-interface UserItem {
-  email: string;
-  gender: string;
-  name: {
-    first: string;
-    last: string;
-    title: string;
-  };
-  nat: string;
-  picture: {
-    large: string;
-    medium: string;
-    thumbnail: string;
-  };
-}
+require('dayjs/locale/zh-cn');
 
-const fakeDataUrl =
-  'https://randomuser.me/api/?results=20&inc=name,gender,email,nat,picture&noinfo';
 const ContainerHeight = 500;
 
 type Iprops = {};
 
 export default function Index(props: Iprops) {
-  const [data, setData] = useState<UserItem[]>([]);
   const [tableData, setTableData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const appendData = () => {
-    fetch(fakeDataUrl)
-      .then((res) => res.json())
-      .then((body) => {
-        setData(data.concat(body.results));
-        message.success(`${body.results.length} more items loaded!`);
-      });
-  };
-
   const getData = async () => {
     const result = await window.electron.ipcRenderer.invoke('get-list', '');
-    const list = result.data.map((item: any) => {
-      return {
-        ...item,
-        createdTime: dayjs(item.createdTime).format('YYYY-MM-DD HH:mm:ss'),
-      };
-    });
-    setTableData(list);
+    setTableData(result.data);
   };
 
   const addData = async () => {
     setLoading(true);
-    const result = await window.electron.ipcRenderer.invoke('add-data', {
+    await window.electron.ipcRenderer.invoke('add-data', {
       content: '',
       tag: 'default',
     });
     setLoading(false);
-    console.log(333, result);
+    getData();
   };
 
   useEffect(() => {
-    appendData();
     getData();
   }, []);
 
@@ -76,7 +43,7 @@ export default function Index(props: Iprops) {
       e.currentTarget.scrollHeight - e.currentTarget.scrollTop ===
       ContainerHeight
     ) {
-      appendData();
+      getData();
     }
   };
 
@@ -108,14 +75,18 @@ export default function Index(props: Iprops) {
           itemKey="email"
           onScroll={onScroll}
         >
-          {(item: UserItem) => (
+          {(item: any) => (
             <List.Item key={item.email} className={styles.listItem}>
               {console.log(333, item)}
               <div className={styles.timeLine}>
-                <div className={styles.left}>30</div>
+                <div className={styles.left}>
+                  {dayjs(item.createdTime).format('DD')}
+                </div>
                 <div className={styles.right}>
-                  <div>11月</div>
-                  <div>星期四</div>
+                  <div>{dayjs(item.createdTime).format('MM')}月</div>
+                  <div>
+                    {dayjs(item.createdTime).locale('zh-cn').format('dddd')}
+                  </div>
                 </div>
               </div>
               <div className={styles.liner}>
@@ -128,7 +99,9 @@ export default function Index(props: Iprops) {
                   {/* <Avatar src={item.picture} /> */}
                 </div>
                 <div className={styles.bottom}>
-                  <span className={styles.time}>{item.createdTime}</span>
+                  <span className={styles.time}>
+                    {dayjs(item.createdTime).format('YYYY-MM-DD HH:mm:ss')}
+                  </span>
                 </div>
               </div>
             </List.Item>
