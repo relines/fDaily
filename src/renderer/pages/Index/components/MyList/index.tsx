@@ -49,9 +49,9 @@ export default function Index(props: Iprops) {
 
   const addData = async () => {
     const result = await window.electron.ipcRenderer.invoke('add-data', {
-      name: 'harry',
-      email: '123@qq.com',
-      phone: 130303030303,
+      tel: 13030303030,
+      cookie: '123412341234124',
+      uin: 'test',
     });
     console.log(333, result);
   };

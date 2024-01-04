@@ -4,6 +4,8 @@ import React, { useState, useRef } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
+import { Button } from 'antd';
+
 import styles from './index.module.less';
 
 // const ReactQuill =
@@ -13,18 +15,32 @@ type Iprops = {};
 
 export default function Index(props: Iprops) {
   const [value, setValue] = useState('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   const quillRef = useRef<any>();
 
+  const addData = async () => {
+    setLoading(true);
+    const result = await window.electron.ipcRenderer.invoke('add-data', {
+      content: value,
+      tag: 'default',
+    });
+    setLoading(false);
+    console.log(333, result);
+  };
+
   return (
     <div className={styles.container}>
-      <div
+      <Button
+        type="primary"
+        loading={loading}
         onClick={() => {
-          console.log(3, value);
+          addData();
         }}
       >
-        getVal
-      </div>
+        新增
+      </Button>
+
       <ReactQuill
         theme="snow"
         ref={quillRef}
