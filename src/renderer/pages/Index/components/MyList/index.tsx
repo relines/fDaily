@@ -1,10 +1,11 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useContext } from 'react';
 import VirtualList from 'rc-virtual-list';
-import { List, message } from 'antd';
+import { List } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
 
 import dayjs from 'dayjs';
@@ -15,29 +16,19 @@ require('dayjs/locale/zh-cn');
 
 const ContainerHeight = 500;
 
-type Iprops = {};
+type Iprops = {
+  dataSource: any[];
+  total: number;
+  updateDataSource: () => void;
+  activeItem: any;
+  changeActiveItem: any;
+};
 
 export default function Index(props: Iprops) {
-  const [activeRecord, setActiveRecord] = useState<any>({});
-  const [tableData, setTableData] = useState<any[]>([]);
+  const { dataSource, total, updateDataSource, activeItem, changeActiveItem } =
+    props;
+
   const [loading, setLoading] = useState<boolean>(false);
-  const [total, setTotal] = useState<number>(0);
-
-  const pageIndexRef = useRef<number>(0);
-
-  const getData = async () => {
-    const result = await window.electron.ipcRenderer.invoke('get-list', {
-      pageIndex: pageIndexRef.current,
-    });
-    if (result.data?.length) {
-      pageIndexRef.current += 1;
-      setTableData(tableData.concat(result.data));
-      setTotal(result.total);
-      message.success('+10条数据');
-    } else {
-      message.warning('没有更多数据了');
-    }
-  };
 
   const addData = async () => {
     setLoading(true);
@@ -46,19 +37,15 @@ export default function Index(props: Iprops) {
       tag: 'default',
     });
     setLoading(false);
-    getData();
+    updateDataSource();
   };
-
-  useEffect(() => {
-    getData();
-  }, []);
 
   const onScroll = (e: React.UIEvent<HTMLElement, UIEvent>) => {
     if (
       e.currentTarget.scrollHeight - e.currentTarget.scrollTop ===
       ContainerHeight
     ) {
-      getData();
+      updateDataSource();
     }
   };
 
@@ -78,7 +65,7 @@ export default function Index(props: Iprops) {
           />
         </div>
         <VirtualList
-          data={tableData}
+          data={dataSource}
           height={ContainerHeight}
           itemHeight={50}
           itemKey="email"
@@ -103,10 +90,10 @@ export default function Index(props: Iprops) {
               </div>
               <div
                 className={`${styles.content} ${
-                  activeRecord.code === item.code && styles.activedContent
+                  activeItem.code === item.code && styles.activedContent
                 }`}
                 onClick={() => {
-                  setActiveRecord(item);
+                  changeActiveItem(item);
                 }}
               >
                 <div className={styles.text}>{item.content}</div>

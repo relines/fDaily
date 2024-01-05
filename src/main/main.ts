@@ -69,8 +69,12 @@ ipcMain.on('ipc-example', async (event, arg) => {
 });
 
 ipcMain.handle('add-data', async (event, message) => {
-  console.log(333333333333, message);
   const result = testApi.addTest(message);
+  return result;
+});
+
+ipcMain.handle('update-data', async (event, message) => {
+  const result = testApi.updateTest(message);
   return result;
 });
 

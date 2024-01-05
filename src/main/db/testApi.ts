@@ -72,25 +72,21 @@ export default {
       );
     });
   },
-  updateTest({ id, content, tag }: any) {
+  updateTest(params: any) {
+    const { code, content, tag } = params;
     const db = conDb();
 
-    const createdTime = new Date().getTime();
-
     return new Promise((resolve, reject) => {
-      let sql = `INSERT INTO test (id,content, tag, createdTime) `;
-      sql += `values ("${id}","${content}", "${tag}", "${createdTime}")`;
-
-      const inquire = `select * from test where id = "${id}"`;
-
-      db.all(inquire, (err: any, list: any) => {
+      const inquire = `select * from test where code = "${code}"`;
+      const sql = `UPDATE test SET content = ${content}, tag = ${tag} WHERE code = ${code}`;
+      db.get(inquire, (err: any, item: any) => {
         // 查询用户
         if (err) {
           reject({ code: 400, msg: err, data: [] });
         } else {
-          if (list.length) {
-            // 有用户
-            resolve({ code: 201, msg: '已有该用户', data: list });
+          if (!item) {
+            // 没有查到
+            resolve({ code: 201, msg: '没有查到code', data: item });
           } else {
             // 没有用户
             db.run(sql, (error: any, data: any) => {
