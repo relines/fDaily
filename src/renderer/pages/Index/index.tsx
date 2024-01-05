@@ -24,7 +24,6 @@ export default function IndexCom() {
       pageIndexRef.current += 1;
       setTableData(tableData.concat(result.data));
       setTotal(result.total);
-      console.log(666, result);
       message.success('+10条数据');
     } else {
       message.warning('没有更多数据了');

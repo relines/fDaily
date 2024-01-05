@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useContext, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -26,7 +26,6 @@ export default function Index(props: Iprops) {
 
   const updateData = async () => {
     setLoading(true);
-    console.log(111, activeItem, value);
     await window.electron.ipcRenderer.invoke('update-data', {
       code: activeItem.code,
       content: value,
