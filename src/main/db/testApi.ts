@@ -6,10 +6,16 @@ import dayjs from 'dayjs';
 import conDb from './index';
 
 export default {
-  getTest({ page = 1, pageSize = 10, tel = '' }) {
+  getTest(params: any) {
+    const { pageIndex = 1 } = params;
     const db = conDb();
     // 获取total语法
     const totalSql = `select count(*) total from test`;
+
+    // 实现分页语法
+    const sql = `select * from test ORDER BY code DESC LIMIT 10 OFFSET ${
+      10 * pageIndex
+    }`;
 
     let total = 0;
     return new Promise((resolve, reject) => {
@@ -19,21 +25,13 @@ export default {
           reject({ code: 200, msg: err, data: '总计条数错误' });
         }
         total = totalData[0].total;
-      });
-
-      // 实现分页语法
-      let sql = `select * from test ORDER BY code DESC`;
-      if (tel) {
-        sql += ` where tel = "${tel}"`;
-      }
-      sql += ` limit ${(page - 1) * pageSize},${pageSize}`;
-
-      db.all(sql, (error: any, data: any) => {
-        if (error) {
-          reject({ code: 400, msg: error });
-        } else {
-          resolve({ code: 200, msg: '成功', data });
-        }
+        db.all(sql, (error: any, data: any) => {
+          if (error) {
+            reject({ code: 400, msg: error });
+          } else {
+            resolve({ code: 200, msg: '成功', data, total });
+          }
+        });
       });
     });
   },

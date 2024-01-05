@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import VirtualList from 'rc-virtual-list';
 import { List, message } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
@@ -18,13 +18,25 @@ const ContainerHeight = 500;
 type Iprops = {};
 
 export default function Index(props: Iprops) {
+  const [activeRecord, setActiveRecord] = useState<any>({});
   const [tableData, setTableData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [activeRecord, setActiveRecord] = useState<any>({});
+  const [total, setTotal] = useState<number>(0);
+
+  const pageIndexRef = useRef<number>(0);
 
   const getData = async () => {
-    const result = await window.electron.ipcRenderer.invoke('get-list', '');
-    setTableData(result.data);
+    const result = await window.electron.ipcRenderer.invoke('get-list', {
+      pageIndex: pageIndexRef.current,
+    });
+    if (result.data?.length) {
+      pageIndexRef.current += 1;
+      setTableData(tableData.concat(result.data));
+      setTotal(result.total);
+      message.success('+10条数据');
+    } else {
+      message.warning('没有更多数据了');
+    }
   };
 
   const addData = async () => {
@@ -54,19 +66,13 @@ export default function Index(props: Iprops) {
     <div className={styles.container}>
       <List>
         <div className={styles.header}>
-          <button
-            type="button"
-            onClick={() => {
-              getData();
-            }}
-          >
-            getList
-          </button>
+          <span>共{total}条</span>
           <PlusCircleOutlined
             disabled={loading}
             style={{
               float: 'right',
               cursor: 'pointer',
+              marginTop: '3px',
             }}
             onClick={() => addData()}
           />

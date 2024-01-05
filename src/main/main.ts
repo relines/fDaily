@@ -76,7 +76,7 @@ ipcMain.handle('add-data', async (event, message) => {
 
 ipcMain.handle('get-list', async (event, message) => {
   console.log(`receive message from render: ${message}`);
-  const result = testApi.getTest({});
+  const result = testApi.getTest(message);
   return result;
 });
 
