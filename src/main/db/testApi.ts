@@ -38,7 +38,7 @@ export default {
   addTest({ content, tag }: any) {
     const db = conDb();
 
-    const createdTime = new Date().getTime();
+    const createTime = new Date().getTime();
     const formatDay = dayjs(new Date()).format('YYYYMMDD');
     let code = Number(`${formatDay}0001`);
 
@@ -58,7 +58,7 @@ export default {
               }
             }
             db.run(
-              `INSERT INTO test (code, content, tag, createdTime) values ("${code}","${content}", "${tag}", "${createdTime}")`,
+              `INSERT INTO test (code, content, tag, createTime) values ("${code}","${content}", "${tag}", "${createTime}")`,
               (error: any, data: any) => {
                 if (error) {
                   reject({ code: 400, msg: error });
@@ -78,17 +78,14 @@ export default {
 
     return new Promise((resolve, reject) => {
       const inquire = `select * from test where code = "${code}"`;
-      const sql = `UPDATE test SET content = ${content}, tag = ${tag} WHERE code = ${code}`;
+      const sql = `UPDATE test SET content = "${content}", tag = "${tag}" WHERE code = "${code}"`;
       db.get(inquire, (err: any, item: any) => {
-        // 查询用户
         if (err) {
           reject({ code: 400, msg: err, data: [] });
         } else {
           if (!item) {
-            // 没有查到
             resolve({ code: 201, msg: '没有查到code', data: item });
           } else {
-            // 没有用户
             db.run(sql, (error: any, data: any) => {
               if (error) {
                 reject({ code: 400, msg: error });

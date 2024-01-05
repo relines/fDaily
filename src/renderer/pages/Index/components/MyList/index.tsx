@@ -22,16 +22,25 @@ type Iprops = {
   updateDataSource: () => void;
   activeItem: any;
   changeActiveItem: any;
+  resetPageIndex: () => void;
 };
 
 export default function Index(props: Iprops) {
-  const { dataSource, total, updateDataSource, activeItem, changeActiveItem } =
-    props;
+  const {
+    dataSource,
+    total,
+    updateDataSource,
+    activeItem,
+    changeActiveItem,
+    resetPageIndex,
+  } = props;
 
   const [loading, setLoading] = useState<boolean>(false);
 
   const addData = async () => {
+    changeActiveItem();
     setLoading(true);
+    resetPageIndex();
     await window.electron.ipcRenderer.invoke('add-data', {
       content: '',
       tag: 'default',
@@ -53,7 +62,7 @@ export default function Index(props: Iprops) {
     <div className={styles.container}>
       <List>
         <div className={styles.header}>
-          <span>共{total}条</span>
+          <span onClick={() => updateDataSource()}>共{total}条</span>
           <PlusCircleOutlined
             disabled={loading}
             style={{
@@ -75,12 +84,12 @@ export default function Index(props: Iprops) {
             <List.Item key={item.email} className={styles.listItem}>
               <div className={styles.timeLine}>
                 <div className={styles.left}>
-                  {dayjs(item.createdTime).format('DD')}
+                  {dayjs(item.createTime).format('DD')}
                 </div>
                 <div className={styles.right}>
-                  <div>{dayjs(item.createdTime).format('MM')}月</div>
+                  <div>{dayjs(item.createTime).format('MM')}月</div>
                   <div>
-                    {dayjs(item.createdTime).locale('zh-cn').format('dddd')}
+                    {dayjs(item.createTime).locale('zh-cn').format('dddd')}
                   </div>
                 </div>
               </div>
@@ -90,7 +99,7 @@ export default function Index(props: Iprops) {
               </div>
               <div
                 className={`${styles.content} ${
-                  activeItem.code === item.code && styles.activedContent
+                  activeItem?.code === item.code && styles.activedContent
                 }`}
                 onClick={() => {
                   changeActiveItem(item);
@@ -102,7 +111,7 @@ export default function Index(props: Iprops) {
                 </div>
                 <div className={styles.bottom}>
                   <span className={styles.time}>
-                    {dayjs(item.createdTime).format('YYYY-MM-DD HH:mm:ss')}
+                    {dayjs(item.createTime).format('YYYY-MM-DD HH:mm:ss')}
                   </span>
                 </div>
               </div>

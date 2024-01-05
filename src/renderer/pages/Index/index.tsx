@@ -20,6 +20,7 @@ export default function IndexCom() {
     const result = await window.electron.ipcRenderer.invoke('get-list', {
       pageIndex: pageIndexRef.current,
     });
+    console.log(666, result, pageIndexRef.current);
     if (result.data?.length) {
       pageIndexRef.current += 1;
       setTableData(tableData.concat(result.data));
@@ -28,6 +29,10 @@ export default function IndexCom() {
     } else {
       message.warning('没有更多数据了');
     }
+  };
+
+  const resetPageIndex = () => {
+    pageIndexRef.current = 0;
   };
 
   useEffect(() => {
@@ -46,6 +51,7 @@ export default function IndexCom() {
           updateDataSource={() => getData()}
           activeItem={activeItem}
           changeActiveItem={setActiveItem}
+          resetPageIndex={resetPageIndex}
         />
       </div>
       <div className={`${styles.content} ${styles.editContainer}`}>

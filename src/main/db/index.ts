@@ -32,7 +32,7 @@ export function init() {
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 code int,
                 content varchar(5000),
-                createdTime int,
+                createTime int,
                 updateTime int,
                 tag varchar(2000),
                 uid varchar(1000) DEFAULT null
