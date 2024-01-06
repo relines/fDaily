@@ -19,34 +19,26 @@ const ContainerHeight = 500;
 type Iprops = {
   dataSource: any[];
   total: number;
-  updateDataSource: () => void;
   activeItem: any;
   changeActiveItem: any;
-  resetPageIndex: () => void;
+  changeDataSource: (type: 'more' | 'new' | 'save', data?: any) => void;
 };
 
 export default function Index(props: Iprops) {
-  const {
-    dataSource,
-    total,
-    updateDataSource,
-    activeItem,
-    changeActiveItem,
-    resetPageIndex,
-  } = props;
+  const { dataSource, total, activeItem, changeActiveItem, changeDataSource } =
+    props;
 
   const [loading, setLoading] = useState<boolean>(false);
 
   const addData = async () => {
     changeActiveItem();
     setLoading(true);
-    resetPageIndex();
     await window.electron.ipcRenderer.invoke('add-data', {
       content: '',
       tag: 'default',
     });
     setLoading(false);
-    updateDataSource();
+    changeDataSource('new');
   };
 
   const onScroll = (e: React.UIEvent<HTMLElement, UIEvent>) => {
@@ -54,7 +46,7 @@ export default function Index(props: Iprops) {
       e.currentTarget.scrollHeight - e.currentTarget.scrollTop ===
       ContainerHeight
     ) {
-      updateDataSource();
+      changeDataSource('more');
     }
   };
 
@@ -62,7 +54,7 @@ export default function Index(props: Iprops) {
     <div className={styles.container}>
       <List>
         <div className={styles.header}>
-          <span onClick={() => updateDataSource()}>共{total}条</span>
+          <span>共{total}条</span>
           <PlusCircleOutlined
             disabled={loading}
             style={{
@@ -77,11 +69,11 @@ export default function Index(props: Iprops) {
           data={dataSource}
           height={ContainerHeight}
           itemHeight={50}
-          itemKey="email"
+          itemKey="code"
           onScroll={onScroll}
         >
           {(item: any) => (
-            <List.Item key={item.email} className={styles.listItem}>
+            <List.Item key={item.code} className={styles.listItem}>
               <div className={styles.timeLine}>
                 <div className={styles.left}>
                   {dayjs(item.createTime).format('DD')}

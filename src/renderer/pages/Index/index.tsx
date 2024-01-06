@@ -11,7 +11,7 @@ import styles from './index.module.less';
 
 export default function IndexCom() {
   const [activeItem, setActiveItem] = useState({});
-  const [tableData, setTableData] = useState([]);
+  const [tableData, setTableData] = useState<any[]>([]);
   const [total, setTotal] = useState<number>(0);
 
   const pageIndexRef = useRef<number>(0);
@@ -20,23 +20,50 @@ export default function IndexCom() {
     const result = await window.electron.ipcRenderer.invoke('get-list', {
       pageIndex: pageIndexRef.current,
     });
-    console.log(666, result, pageIndexRef.current);
-    if (result.data?.length) {
+    setTotal(result?.total || total);
+    return result;
+  };
+
+  const changeDataSource = async (
+    type: 'more' | 'new' | 'save',
+    data?: any,
+  ) => {
+    // more: 下拉刷新, pageIndex += 1,然后获取tableData；
+    // new: 新建日记，pageIndex = 0,然后获取tableData；
+    // save: 保存日记，用data替换tableData中修改的数据；
+    if (type === 'more') {
       pageIndexRef.current += 1;
-      setTableData(tableData.concat(result.data));
-      setTotal(result.total);
-      message.success('+10条数据');
-    } else {
-      message.warning('没有更多数据了');
+      const result = await getData();
+      if (result.data?.length) {
+        setTableData(tableData.concat(result.data));
+        message.success('+10条数据');
+      } else {
+        message.warning('没有更多数据了');
+      }
+    }
+    if (type === 'new') {
+      pageIndexRef.current = 0;
+      const result = await getData();
+      if (result.data?.length) {
+        setTableData(result.data);
+        message.success('获取到前10条数据');
+      } else {
+        message.warning('暂无数据');
+      }
+    }
+    if (type === 'save') {
+      const newData = tableData.map((item: any) => {
+        if (item.code === data.code) {
+          return data;
+        }
+        return item;
+      });
+      setTableData(newData);
     }
   };
 
-  const resetPageIndex = () => {
-    pageIndexRef.current = 0;
-  };
-
   useEffect(() => {
-    getData();
+    changeDataSource('new');
   }, []);
 
   return (
@@ -48,14 +75,13 @@ export default function IndexCom() {
         <MyList
           dataSource={tableData}
           total={total}
-          updateDataSource={() => getData()}
           activeItem={activeItem}
           changeActiveItem={setActiveItem}
-          resetPageIndex={resetPageIndex}
+          changeDataSource={changeDataSource}
         />
       </div>
       <div className={`${styles.content} ${styles.editContainer}`}>
-        <MyEdit updateDataSource={() => getData()} activeItem={activeItem} />
+        <MyEdit activeItem={activeItem} changeDataSource={changeDataSource} />
       </div>
     </div>
   );

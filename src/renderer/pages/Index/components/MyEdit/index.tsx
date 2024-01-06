@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -13,12 +13,12 @@ import styles from './index.module.less';
 //   typeof window === 'object' ? require('react-quill') : () => false;
 
 type Iprops = {
-  updateDataSource: () => void;
   activeItem: any;
+  changeDataSource: (type: 'more' | 'new' | 'save', data?: any) => void;
 };
 
 export default function Index(props: Iprops) {
-  const { updateDataSource, activeItem } = props;
+  const { activeItem, changeDataSource } = props;
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -26,15 +26,18 @@ export default function Index(props: Iprops) {
 
   const updateData = async () => {
     setLoading(true);
-    await window.electron.ipcRenderer.invoke('update-data', {
+    const result = await window.electron.ipcRenderer.invoke('update-data', {
       code: activeItem.code,
       content: value,
       tag: 'default',
     });
     setLoading(false);
     message.success('保存成功');
-    updateDataSource();
+    changeDataSource('save', result?.data);
   };
+  useEffect(() => {
+    setValue(activeItem.content);
+  }, [activeItem]);
 
   return (
     <div className={styles.container}>

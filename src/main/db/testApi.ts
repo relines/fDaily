@@ -79,21 +79,21 @@ export default {
     return new Promise((resolve, reject) => {
       const inquire = `select * from test where code = "${code}"`;
       const sql = `UPDATE test SET content = "${content}", tag = "${tag}" WHERE code = "${code}"`;
-      db.get(inquire, (err: any, item: any) => {
-        if (err) {
-          reject({ code: 400, msg: err, data: [] });
+      db.run(sql, (error: any, data: any) => {
+        if (error) {
+          reject({ code: 400, msg: error });
         } else {
-          if (!item) {
-            resolve({ code: 201, msg: '没有查到code', data: item });
-          } else {
-            db.run(sql, (error: any, data: any) => {
-              if (error) {
-                reject({ code: 400, msg: error });
+          db.get(inquire, (err: any, item: any) => {
+            if (err) {
+              reject({ code: 400, msg: err, data: [] });
+            } else {
+              if (!item) {
+                resolve({ code: 201, msg: '没有查到code', data: item });
               } else {
-                resolve({ code: 200, msg: '成功', data });
+                resolve({ code: 200, msg: '成功', data: item });
               }
-            });
-          }
+            }
+          });
         }
       });
     });
