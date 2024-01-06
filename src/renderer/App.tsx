@@ -1,4 +1,5 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import HeaderCom from './pages/Header';
 import './App.css';
 
 import IndexCom from './pages/Index';
@@ -6,7 +7,7 @@ import IndexCom from './pages/Index';
 function Hello() {
   return (
     <div>
-      <h1>react-boilerplate</h1>
+      <HeaderCom />
       <IndexCom />
     </div>
   );

@@ -94,6 +94,8 @@ const createWindow = async () => {
     width: 1024,
     height: 728,
     icon: getAssetPath('icon.png'),
+    titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 10, y: 14 },
     webPreferences: {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
@@ -114,6 +116,13 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
+  });
+
+  mainWindow?.on('resize', () => {
+    mainWindow?.webContents.send(
+      'mainWindowResize',
+      mainWindow?.isFullScreen(),
+    );
   });
 
   mainWindow.on('closed', () => {
