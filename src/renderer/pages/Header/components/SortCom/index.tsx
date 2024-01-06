@@ -1,9 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable react/no-unstable-nested-components */
 // 分类设置
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { Space, Table, Button } from 'antd';
+import { Modal, Table, Button, Form, Input } from 'antd';
 
 import styles from './index.module.less';
 
@@ -15,6 +18,18 @@ export default function SortCom(props: Iprops) {
   const { dataSource } = props;
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [modalType, setModalType] = useState<string>('');
+  const [editRecord, setEditRecord] = useState<any>({});
+
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (modalType === 'edit') {
+      form.setFieldsValue({
+        ...editRecord,
+      });
+    }
+  }, [modalType]);
 
   const columns: any[] = [
     {
@@ -48,7 +63,14 @@ export default function SortCom(props: Iprops) {
             textAlign: 'center',
           }}
         >
-          <a>编辑</a>
+          <a
+            onClick={() => {
+              setModalType('edit');
+              setEditRecord(record);
+            }}
+          >
+            编辑
+          </a>
           <a>删除</a>
         </div>
       ),
@@ -82,7 +104,9 @@ export default function SortCom(props: Iprops) {
   return (
     <div className={styles.container}>
       <div className={styles.topbar}>
-        <Button type="primary">新增</Button>
+        <Button type="primary" onClick={() => setModalType('add')}>
+          新增
+        </Button>
       </div>
       <Table
         rowKey="key"
@@ -117,6 +141,48 @@ export default function SortCom(props: Iprops) {
           },
         }}
       />
+      <Modal
+        title={modalType === 'add' ? '新增分类' : '编辑分类'}
+        open={modalType !== ''}
+        width={600}
+        onOk={() => {
+          console.log(333, form.getFieldsValue());
+        }}
+        onCancel={() => setModalType('')}
+      >
+        <Form
+          name="add"
+          form={form}
+          labelCol={{
+            style: {
+              width: '80px',
+            },
+          }}
+          wrapperCol={{
+            style: {
+              width: '200px',
+            },
+          }}
+          style={{ maxWidth: 600 }}
+          autoComplete="off"
+        >
+          <Form.Item
+            label="名称"
+            name="name"
+            rules={[{ required: true, message: '请输入' }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="备注"
+            name="remark"
+            rules={[{ required: true, message: '请输入' }]}
+          >
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

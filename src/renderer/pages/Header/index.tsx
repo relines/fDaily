@@ -66,7 +66,7 @@ export default function HeaderCom() {
       <Modal
         title="分类设置"
         open={isModalOpen}
-        width={600}
+        width={750}
         onOk={() => {}}
         onCancel={() => setIsModalOpen(false)}
       >
