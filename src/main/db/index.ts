@@ -34,6 +34,7 @@ export function init() {
                 content varchar(5000),
                 createTime int,
                 updateTime int,
+                category varchar(500),
                 tag varchar(2000)
             )`);
       db.run(`create table if not exists category_table (

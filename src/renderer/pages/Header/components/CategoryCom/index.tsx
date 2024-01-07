@@ -6,7 +6,8 @@
 // 分类设置
 import React, { useEffect, useState } from 'react';
 
-import { Modal, Table, Button, Form, Input, InputNumber } from 'antd';
+import { Modal, Table, Button, Form, Input, InputNumber, message } from 'antd';
+import { ExclamationCircleFilled } from '@ant-design/icons';
 
 import styles from './index.module.less';
 
@@ -20,6 +21,7 @@ export default function CategoryCom(props: Iprops) {
   const [loading, setLoading] = useState<boolean>(false);
   const [modalType, setModalType] = useState<string>('');
   const [editRecord, setEditRecord] = useState<any>({});
+  const [tableData, setTableData] = useState<any[]>([]);
 
   const [form] = Form.useForm();
 
@@ -31,15 +33,59 @@ export default function CategoryCom(props: Iprops) {
     }
   }, [modalType]);
 
+  const getCategory = async () => {
+    setLoading(true);
+    const resp = await window.electron.ipcRenderer.invoke('get-category', {});
+    setTableData(resp.data);
+    setLoading(false);
+  };
+
   const addCategory = async () => {
     const values = form.getFieldsValue();
-    setLoading(true);
     const resp = await window.electron.ipcRenderer.invoke('add-category', {
       ...values,
     });
-    console.log(333, resp);
-    setLoading(false);
+    if (resp.code === 200) {
+      message.success('新增成功');
+      getCategory();
+      setModalType('');
+      form.resetFields();
+    } else {
+      message.error(resp.msg);
+    }
   };
+
+  const updateCategory = async () => {
+    const values = form.getFieldsValue();
+    const resp = await window.electron.ipcRenderer.invoke('update-category', {
+      ...values,
+      id: editRecord.id,
+    });
+    if (resp.code === 200) {
+      message.success('更新成功');
+      getCategory();
+      setModalType('');
+      form.resetFields();
+    } else {
+      message.error(resp.msg);
+    }
+  };
+
+  const deleteCategory = async (id: number) => {
+    const resp = await window.electron.ipcRenderer.invoke('delete-category', {
+      id,
+    });
+    if (resp.code === 200) {
+      message.success('删除成功');
+      getCategory();
+    } else {
+      message.error(resp.msg);
+    }
+  };
+
+  useEffect(() => {
+    getCategory();
+  }, []);
 
   const columns: any[] = [
     {
@@ -66,6 +112,7 @@ export default function CategoryCom(props: Iprops) {
     {
       title: '操作',
       key: 'operate',
+      width: 100,
       align: 'center',
       render: (_: any, record: any) => (
         <div
@@ -81,33 +128,31 @@ export default function CategoryCom(props: Iprops) {
           >
             编辑
           </a>
-          <a>删除</a>
+          <a
+            onClick={() => {
+              Modal.confirm({
+                title: '确定要删除这个分类么？',
+                icon: <ExclamationCircleFilled />,
+                content: '请注意，这是危险操作！',
+                okText: '确认',
+                okType: 'danger',
+                okButtonProps: {
+                  type: 'primary',
+                },
+                cancelText: '取消',
+                onOk() {
+                  deleteCategory(record.id);
+                },
+              });
+            }}
+            style={{
+              color: '#f00',
+            }}
+          >
+            删除
+          </a>
         </div>
       ),
-    },
-  ];
-
-  const data: any[] = [
-    {
-      key: '1',
-      name: '分类一',
-      number: 32,
-      remark: 'New York No. 1 Lake Park',
-      tags: ['nice', 'developer'],
-    },
-    {
-      key: '2',
-      name: '分类二',
-      number: 42,
-      remark: 'London No. 1 Lake Park',
-      tags: ['loser'],
-    },
-    {
-      key: '3',
-      name: '分类三',
-      number: 32,
-      remark: 'Sydney No. 1 Lake Park',
-      tags: ['cool', 'teacher'],
     },
   ];
 
@@ -119,46 +164,29 @@ export default function CategoryCom(props: Iprops) {
         </Button>
       </div>
       <Table
-        rowKey="key"
+        rowKey="id"
         columns={columns}
-        dataSource={data}
+        dataSource={tableData}
         loading={loading}
-        pagination={{
-          showQuickJumper: true,
-          showSizeChanger: true,
-          showTotal: (total: number, range: number[]) => {
-            const Styles = {
-              color: '#2766FF',
-            };
-            return (
-              <span>
-                第
-                <strong>
-                  <span style={Styles}>{range[0]}</span>
-                </strong>{' '}
-                -{' '}
-                <strong>
-                  <span style={Styles}> {range[1]} </span>
-                </strong>
-                条，总共
-                <strong>
-                  {' '}
-                  <span style={Styles}>{total}</span>
-                </strong>{' '}
-                条
-              </span>
-            );
-          },
-        }}
+        size="small"
+        bordered
+        pagination={false}
       />
       <Modal
         title={modalType === 'add' ? '新增分类' : '编辑分类'}
         open={modalType !== ''}
         width={600}
         onOk={() => {
-          addCategory();
+          if (modalType === 'add') {
+            addCategory();
+          } else {
+            updateCategory();
+          }
         }}
-        onCancel={() => setModalType('')}
+        onCancel={() => {
+          setModalType('');
+          form.resetFields();
+        }}
       >
         <Form
           name="add"

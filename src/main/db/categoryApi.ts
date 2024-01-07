@@ -6,23 +6,20 @@ import dayjs from 'dayjs';
 import conDb from './index';
 
 export default {
-  getData(params: any) {
-    const { pageIndex = 1 } = params;
+  getData() {
     const db = conDb();
     // 获取total语法
     const totalSql = `select count(*) total from category_table`;
 
     // 实现分页语法
-    const sql = `select * from category_table ORDER BY code DESC LIMIT 10 OFFSET ${
-      10 * pageIndex
-    }`;
+    const sql = `select * from category_table ORDER BY sort ASC`;
 
     let total = 0;
     return new Promise((resolve, reject) => {
       // 统计总数
       db.all(totalSql, (err: any, totalData: any) => {
         if (err) {
-          reject({ code: 200, msg: err, data: '总计条数错误' });
+          reject({ code: 200, msg: err, data: '查询总数错误' });
         }
         total = totalData[0].total;
         db.all(sql, (error: any, data: any) => {
@@ -66,13 +63,13 @@ export default {
       );
     });
   },
-  upDate(params: any) {
-    const { code, content, tag } = params;
+  updateData(params: any) {
+    const { id, name, remark, sort } = params;
     const db = conDb();
 
     return new Promise((resolve, reject) => {
-      const inquire = `select * from category_table where code = "${code}"`;
-      const sql = `UPDATE category_table SET content = "${content}", tag = "${tag}" WHERE code = "${code}"`;
+      const inquire = `select * from category_table where id = "${id}"`;
+      const sql = `UPDATE category_table SET name = "${name}", remark = "${remark}", sort = "${sort}" WHERE id = "${id}"`;
       db.run(sql, (error: any, data: any) => {
         if (error) {
           reject({ code: 400, msg: error });
@@ -92,7 +89,7 @@ export default {
       });
     });
   },
-  delData({ id = 1 }) {
+  delData({ id }: any) {
     const sql = `DELETE FROM category_table WHERE id = ${id}`;
     const weightSql = `select * from category_table where id = ${id}`;
     return new Promise((resolve, reject) => {
@@ -110,7 +107,7 @@ export default {
               }
             });
           } else {
-            resolve({ code: 400, msg: `买家号不存在` });
+            resolve({ code: 400, msg: `数据不存在` });
           }
         }
       });

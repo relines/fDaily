@@ -58,6 +58,18 @@ ipcMain.handle('add-category', async (event, message) => {
   const result = categoryApi.addData(message);
   return result;
 });
+ipcMain.handle('get-category', async () => {
+  const result = categoryApi.getData();
+  return result;
+});
+ipcMain.handle('update-category', async (event, message) => {
+  const result = categoryApi.updateData(message);
+  return result;
+});
+ipcMain.handle('delete-category', async (event, message) => {
+  const result = categoryApi.delData(message);
+  return result;
+});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
