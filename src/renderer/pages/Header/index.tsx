@@ -6,7 +6,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button, Dropdown, Modal } from 'antd';
 import { MenuUnfoldOutlined } from '@ant-design/icons';
 
-import SortCom from './components/SortCom';
+import CategoryCom from './components/CategoryCom';
 
 import styles from './index.module.less';
 
@@ -70,7 +70,7 @@ export default function HeaderCom() {
         onOk={() => {}}
         onCancel={() => setIsModalOpen(false)}
       >
-        <SortCom dataSource={[]} />
+        <CategoryCom dataSource={[]} />
       </Modal>
     </div>
   );

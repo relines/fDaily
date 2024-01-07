@@ -36,7 +36,7 @@ export default function Index(props: Iprops) {
     changeDataSource('save', result?.data);
   };
   useEffect(() => {
-    setValue(activeItem.content);
+    setValue(activeItem?.content);
   }, [activeItem]);
 
   return (

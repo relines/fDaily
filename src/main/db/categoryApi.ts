@@ -6,14 +6,14 @@ import dayjs from 'dayjs';
 import conDb from './index';
 
 export default {
-  getTest(params: any) {
+  getData(params: any) {
     const { pageIndex = 1 } = params;
     const db = conDb();
     // 获取total语法
-    const totalSql = `select count(*) total from test`;
+    const totalSql = `select count(*) total from category_table`;
 
     // 实现分页语法
-    const sql = `select * from test ORDER BY code DESC LIMIT 10 OFFSET ${
+    const sql = `select * from category_table ORDER BY code DESC LIMIT 10 OFFSET ${
       10 * pageIndex
     }`;
 
@@ -35,50 +35,44 @@ export default {
       });
     });
   },
-  addTest({ content, tag }: any) {
+  addData({ name, remark, sort }: any) {
     const db = conDb();
 
     const createTime = new Date().getTime();
-    const formatDay = dayjs(new Date()).format('YYYYMMDD');
-    let code = Number(`${formatDay}0001`);
 
     return new Promise((resolve, reject) => {
       db.all(
-        `SELECT * FROM test WHERE code LIKE "${formatDay}%"`,
+        `SELECT * FROM category_table WHERE sort LIKE "${sort}"`,
         (err: any, list: any) => {
           if (err) {
             reject({ code: 400, msg: err, data: [] });
           } else {
             if (list.length) {
-              const codeArr = list.map((item: any) => item.code);
-              const maxCode = Math.max(...codeArr);
-              code = maxCode + 1;
-              if (maxCode.toString().slice(-4) === '9999') {
-                resolve({ code: 201, msg: '已经达到9999条数据', data: list });
-              }
+              resolve({ code: 201, msg: 'sort repeat', data: list });
+            } else {
+              db.run(
+                `INSERT INTO category_table (name, remark,sort, createTime) values ("${name}", "${remark}","${sort}", "${createTime}")`,
+                (error: any, data: any) => {
+                  if (error) {
+                    reject({ code: 400, msg: error });
+                  } else {
+                    resolve({ code: 200, msg: '成功', data });
+                  }
+                },
+              );
             }
-            db.run(
-              `INSERT INTO test (code, content, tag, createTime) values ("${code}","${content}", "${tag}", "${createTime}")`,
-              (error: any, data: any) => {
-                if (error) {
-                  reject({ code: 400, msg: error });
-                } else {
-                  resolve({ code: 200, msg: '成功', data });
-                }
-              },
-            );
           }
         },
       );
     });
   },
-  updateTest(params: any) {
+  upDate(params: any) {
     const { code, content, tag } = params;
     const db = conDb();
 
     return new Promise((resolve, reject) => {
-      const inquire = `select * from test where code = "${code}"`;
-      const sql = `UPDATE test SET content = "${content}", tag = "${tag}" WHERE code = "${code}"`;
+      const inquire = `select * from category_table where code = "${code}"`;
+      const sql = `UPDATE category_table SET content = "${content}", tag = "${tag}" WHERE code = "${code}"`;
       db.run(sql, (error: any, data: any) => {
         if (error) {
           reject({ code: 400, msg: error });
@@ -98,9 +92,9 @@ export default {
       });
     });
   },
-  delTest({ id = 1 }) {
-    const sql = `DELETE FROM test WHERE id = ${id}`;
-    const weightSql = `select * from test where id = ${id}`;
+  delData({ id = 1 }) {
+    const sql = `DELETE FROM category_table WHERE id = ${id}`;
+    const weightSql = `select * from category_table where id = ${id}`;
     return new Promise((resolve, reject) => {
       const db = conDb();
       db.all(weightSql, (err: any, list: any) => {

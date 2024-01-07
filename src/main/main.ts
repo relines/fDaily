@@ -17,7 +17,8 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
 import { init } from './db/index';
-import testApi from './db/testApi';
+import listApi from './db/listApi';
+import categoryApi from './db/categoryApi';
 
 class AppUpdater {
   constructor() {
@@ -35,19 +36,26 @@ ipcMain.on('ipc-example', async (event, arg) => {
   event.reply('ipc-example', msgTemplate('pong'));
 });
 
+// list操作
 ipcMain.handle('add-data', async (event, message) => {
-  const result = testApi.addTest(message);
+  const result = listApi.addList(message);
   return result;
 });
 
 ipcMain.handle('update-data', async (event, message) => {
-  const result = testApi.updateTest(message);
+  const result = listApi.updateList(message);
   return result;
 });
 
 ipcMain.handle('get-list', async (event, message) => {
   console.log(`receive message from render: ${message}`);
-  const result = testApi.getTest(message);
+  const result = listApi.getList(message);
+  return result;
+});
+
+// 分类操作
+ipcMain.handle('add-category', async (event, message) => {
+  const result = categoryApi.addData(message);
   return result;
 });
 

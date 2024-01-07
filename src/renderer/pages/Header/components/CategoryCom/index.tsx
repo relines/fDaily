@@ -6,7 +6,7 @@
 // 分类设置
 import React, { useEffect, useState } from 'react';
 
-import { Modal, Table, Button, Form, Input } from 'antd';
+import { Modal, Table, Button, Form, Input, InputNumber } from 'antd';
 
 import styles from './index.module.less';
 
@@ -14,7 +14,7 @@ type Iprops = {
   dataSource: any[];
 };
 
-export default function SortCom(props: Iprops) {
+export default function CategoryCom(props: Iprops) {
   const { dataSource } = props;
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -30,6 +30,16 @@ export default function SortCom(props: Iprops) {
       });
     }
   }, [modalType]);
+
+  const addCategory = async () => {
+    const values = form.getFieldsValue();
+    setLoading(true);
+    const resp = await window.electron.ipcRenderer.invoke('add-category', {
+      ...values,
+    });
+    console.log(333, resp);
+    setLoading(false);
+  };
 
   const columns: any[] = [
     {
@@ -146,7 +156,7 @@ export default function SortCom(props: Iprops) {
         open={modalType !== ''}
         width={600}
         onOk={() => {
-          console.log(333, form.getFieldsValue());
+          addCategory();
         }}
         onCancel={() => setModalType('')}
       >
@@ -180,6 +190,13 @@ export default function SortCom(props: Iprops) {
             rules={[{ required: true, message: '请输入' }]}
           >
             <Input />
+          </Form.Item>
+          <Form.Item
+            label="排序"
+            name="sort"
+            rules={[{ required: true, message: '请输入' }]}
+          >
+            <InputNumber />
           </Form.Item>
         </Form>
       </Modal>
