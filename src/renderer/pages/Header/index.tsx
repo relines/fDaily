@@ -1,22 +1,41 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/jsx-no-constructed-context-values */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
-import { Button, Dropdown, Modal } from 'antd';
+import { Form, Dropdown, Modal, Select } from 'antd';
 import { MenuUnfoldOutlined } from '@ant-design/icons';
 
-import CategoryCom from './components/CategoryCom';
+import CategorySet from './components/CategorySet';
 
 import styles from './index.module.less';
 
 export default function HeaderCom() {
   const [isFullScreen, setIsFullScreen] = useState<any>(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showCategorySetModal, setShowCategorySetModal] = useState(false);
+  const [showCategoryChooseModal, setShowCategoryChooseModal] = useState(false);
+  const [categoryOption, setCategoryOption] = useState<any[]>([]);
+
+  const [form] = Form.useForm();
 
   window.electron.ipcRenderer.on('mainWindowResize', (arg) => {
     setIsFullScreen(arg);
   });
+
+  const getCategory = async () => {
+    const resp = await window.electron.ipcRenderer.invoke('get-category', {});
+    const opt = resp.data?.map((item: any) => {
+      return {
+        label: item.name,
+        value: item.id,
+      };
+    });
+    setCategoryOption(opt);
+  };
+
+  useEffect(() => {
+    getCategory();
+  }, []);
 
   return (
     <div
@@ -35,15 +54,33 @@ export default function HeaderCom() {
           items: [
             {
               key: '1',
-              label: <div onClick={() => setIsModalOpen(true)}>主目录设置</div>,
+              label: <div>主目录设置</div>,
             },
             {
               key: '2',
-              label: '分类设置',
+              label: '分类',
+              children: [
+                {
+                  key: '1-1',
+                  label: (
+                    <div onClick={() => setShowCategorySetModal(true)}>
+                      设置分类
+                    </div>
+                  ),
+                },
+                {
+                  key: '1-2',
+                  label: (
+                    <div onClick={() => setShowCategoryChooseModal(true)}>
+                      选择分类
+                    </div>
+                  ),
+                },
+              ],
             },
             {
               key: '3',
-              label: '标签设置',
+              label: '标签',
               children: [
                 {
                   key: '1-1',
@@ -65,12 +102,50 @@ export default function HeaderCom() {
 
       <Modal
         title="分类设置"
-        open={isModalOpen}
+        open={showCategorySetModal}
         width={750}
         onOk={() => {}}
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={() => setShowCategorySetModal(false)}
       >
-        <CategoryCom dataSource={[]} />
+        <CategorySet />
+      </Modal>
+      <Modal
+        title="分类选择"
+        open={showCategoryChooseModal}
+        width={400}
+        onOk={() => {}}
+        onCancel={() => setShowCategoryChooseModal(false)}
+      >
+        <Form
+          name="choose"
+          form={form}
+          style={{
+            margin: '20px 0',
+          }}
+          labelCol={{
+            style: {
+              width: '80px',
+            },
+          }}
+          wrapperCol={{
+            style: {
+              width: '200px',
+            },
+          }}
+          autoComplete="off"
+        >
+          <Form.Item
+            label="名称"
+            name="name"
+            rules={[{ required: true, message: '请输入' }]}
+          >
+            <Select
+              defaultValue="lucy"
+              style={{ width: 120 }}
+              options={categoryOption}
+            />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );

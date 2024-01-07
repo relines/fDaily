@@ -11,13 +11,9 @@ import { ExclamationCircleFilled } from '@ant-design/icons';
 
 import styles from './index.module.less';
 
-type Iprops = {
-  dataSource: any[];
-};
+type Iprops = {};
 
 export default function CategoryCom(props: Iprops) {
-  const { dataSource } = props;
-
   const [loading, setLoading] = useState<boolean>(false);
   const [modalType, setModalType] = useState<string>('');
   const [editRecord, setEditRecord] = useState<any>({});
