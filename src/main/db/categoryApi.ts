@@ -32,7 +32,7 @@ export default {
       });
     });
   },
-  addData({ name, remark, sort }: any) {
+  addData({ name, remark, sort, current }: any) {
     const db = conDb();
 
     const createTime = new Date().getTime();
@@ -48,7 +48,7 @@ export default {
               resolve({ code: 201, msg: 'sort repeat', data: list });
             } else {
               db.run(
-                `INSERT INTO category_table (name, remark,sort, createTime) values ("${name}", "${remark}","${sort}", "${createTime}")`,
+                `INSERT INTO category_table (name, remark, sort, current, createTime) values ("${name}", "${remark}", "${sort}", "${current}", "${createTime}")`,
                 (error: any, data: any) => {
                   if (error) {
                     reject({ code: 400, msg: error });
@@ -83,6 +83,38 @@ export default {
               } else {
                 resolve({ code: 200, msg: '成功', data: item });
               }
+            }
+          });
+        }
+      });
+    });
+  },
+  setCurrent(params: any) {
+    const { id } = params;
+    const db = conDb();
+    return new Promise((resolve, reject) => {
+      const inquire = `select * from category_table where current = "1"`;
+      const sql1 = `UPDATE category_table SET current = "2"`;
+      const sql2 = `UPDATE category_table SET current = "1" WHERE id = "${id}"`;
+      db.run(sql1, (err1: any, data1: any) => {
+        if (err1) {
+          reject({ code: 400, msg: err1 });
+        } else {
+          db.run(sql2, (error: any, data: any) => {
+            if (error) {
+              reject({ code: 400, msg: error });
+            } else {
+              db.all(inquire, (err: any, item: any) => {
+                if (err) {
+                  reject({ code: 400, msg: err, data: [] });
+                } else {
+                  if (!item) {
+                    resolve({ code: 201, msg: '没有查到code', data: item });
+                  } else {
+                    resolve({ code: 200, msg: '成功', data: item });
+                  }
+                }
+              });
             }
           });
         }

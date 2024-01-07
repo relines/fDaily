@@ -43,6 +43,7 @@ export function init() {
               remark varchar(500),
               count int,
               createTime int,
+              current varchar(10),
               sort int
           )`);
       resolve({});

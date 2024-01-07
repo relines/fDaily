@@ -15,6 +15,7 @@ export default function HeaderCom() {
   const [showCategorySetModal, setShowCategorySetModal] = useState(false);
   const [showCategoryChooseModal, setShowCategoryChooseModal] = useState(false);
   const [categoryOption, setCategoryOption] = useState<any[]>([]);
+  const [currentCategory, setCurrentCategory] = useState<any>({});
 
   const [form] = Form.useForm();
 
@@ -30,7 +31,34 @@ export default function HeaderCom() {
         value: item.id,
       };
     });
-    setCategoryOption(opt);
+    if (resp.data.length) {
+      const cur: any = resp.data.filter(
+        (item: any) => item.current === '1',
+      )?.[0];
+      const categoryCurrent = cur
+        ? `${cur?.name}_${cur?.id}`
+        : `${resp.data[0]?.name}_${resp.data[0]?.id}`;
+      localStorage.setItem('category_current', categoryCurrent);
+      setCurrentCategory(cur || resp.data[0]);
+      setCategoryOption(opt);
+      form.setFieldsValue({
+        name: cur?.id || resp.data[0]?.id,
+      });
+    }
+  };
+
+  const changeCurrentCategory = async () => {
+    const resp = await window.electron.ipcRenderer.invoke(
+      'set-category-current',
+      {
+        id: form.getFieldsValue()?.name,
+      },
+    );
+    const cur: any = resp.data?.[0];
+    const categoryCurrent = cur && `${cur?.name}_${cur?.id}`;
+    localStorage.setItem('category_current', categoryCurrent);
+    setCurrentCategory(cur);
+    setShowCategoryChooseModal(false);
   };
 
   useEffect(() => {
@@ -100,6 +128,8 @@ export default function HeaderCom() {
         </div>
       </Dropdown>
 
+      <span>分类：{currentCategory.name}</span>
+
       <Modal
         title="分类设置"
         open={showCategorySetModal}
@@ -113,7 +143,9 @@ export default function HeaderCom() {
         title="分类选择"
         open={showCategoryChooseModal}
         width={400}
-        onOk={() => {}}
+        onOk={() => {
+          changeCurrentCategory();
+        }}
         onCancel={() => setShowCategoryChooseModal(false)}
       >
         <Form
@@ -139,11 +171,7 @@ export default function HeaderCom() {
             name="name"
             rules={[{ required: true, message: '请输入' }]}
           >
-            <Select
-              defaultValue="lucy"
-              style={{ width: 120 }}
-              options={categoryOption}
-            />
+            <Select style={{ width: 120 }} options={categoryOption} />
           </Form.Item>
         </Form>
       </Modal>

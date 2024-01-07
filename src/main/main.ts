@@ -70,6 +70,10 @@ ipcMain.handle('delete-category', async (event, message) => {
   const result = categoryApi.delData(message);
   return result;
 });
+ipcMain.handle('set-category-current', async (event, message) => {
+  const result = categoryApi.setCurrent(message);
+  return result;
+});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');

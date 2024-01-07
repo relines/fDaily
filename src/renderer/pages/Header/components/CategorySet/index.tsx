@@ -40,6 +40,7 @@ export default function CategoryCom(props: Iprops) {
     const values = form.getFieldsValue();
     const resp = await window.electron.ipcRenderer.invoke('add-category', {
       ...values,
+      current: '2', // 2 默认，1 current
     });
     if (resp.code === 200) {
       message.success('新增成功');
@@ -124,7 +125,10 @@ export default function CategoryCom(props: Iprops) {
           >
             编辑
           </a>
-          <a
+          <Button
+            type="link"
+            disabled={tableData.length === 1}
+            danger
             onClick={() => {
               Modal.confirm({
                 title: '确定要删除这个分类么？',
@@ -141,12 +145,9 @@ export default function CategoryCom(props: Iprops) {
                 },
               });
             }}
-            style={{
-              color: '#f00',
-            }}
           >
             删除
-          </a>
+          </Button>
         </div>
       ),
     },
