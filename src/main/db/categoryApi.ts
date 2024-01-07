@@ -39,21 +39,34 @@ export default {
 
     return new Promise((resolve, reject) => {
       db.all(
-        `SELECT * FROM category_table WHERE sort LIKE "${sort}"`,
-        (err: any, list: any) => {
-          if (err) {
-            reject({ code: 400, msg: err, data: [] });
+        `SELECT * FROM category_table WHERE name LIKE "${name}"`,
+        (err1: any, list1: any) => {
+          if (err1) {
+            reject({ code: 400, msg: err1, data: [] });
           } else {
-            if (list.length) {
-              resolve({ code: 201, msg: 'sort repeat', data: list });
+            if (list1.length) {
+              resolve({ code: 201, msg: 'name repeat', data: list1 });
             } else {
-              db.run(
-                `INSERT INTO category_table (name, remark, sort, current, createTime) values ("${name}", "${remark}", "${sort}", "${current}", "${createTime}")`,
-                (error: any, data: any) => {
-                  if (error) {
-                    reject({ code: 400, msg: error });
+              db.all(
+                `SELECT * FROM category_table WHERE sort LIKE "${sort}"`,
+                (err2: any, list2: any) => {
+                  if (err2) {
+                    reject({ code: 400, msg: err2, data: [] });
                   } else {
-                    resolve({ code: 200, msg: '成功', data });
+                    if (list2.length) {
+                      resolve({ code: 201, msg: 'sort repeat', data: list });
+                    } else {
+                      db.run(
+                        `INSERT INTO category_table (name, remark, sort, current, createTime) values ("${name}", "${remark}", "${sort}", "${current}", "${createTime}")`,
+                        (error: any, data: any) => {
+                          if (error) {
+                            reject({ code: 400, msg: error });
+                          } else {
+                            resolve({ code: 200, msg: '成功', data });
+                          }
+                        },
+                      );
+                    }
                   }
                 },
               );
@@ -70,32 +83,46 @@ export default {
     return new Promise((resolve, reject) => {
       const inquire = `select * from category_table where id = "${id}"`;
       const sql = `UPDATE category_table SET name = "${name}", remark = "${remark}", sort = "${sort}" WHERE id = "${id}"`;
-      db.run(sql, (error: any, data: any) => {
-        if (error) {
-          reject({ code: 400, msg: error });
-        } else {
-          db.get(inquire, (err: any, item: any) => {
-            if (err) {
-              reject({ code: 400, msg: err, data: [] });
+
+      db.all(
+        `SELECT * FROM category_table WHERE name LIKE "${name}"`,
+        (err1: any, list1: any) => {
+          if (err1) {
+            reject({ code: 400, msg: err1, data: [] });
+          } else {
+            if (list1.length) {
+              resolve({ code: 201, msg: 'name repeat', data: list1 });
             } else {
-              if (!item) {
-                resolve({ code: 201, msg: '没有查到code', data: item });
-              } else {
-                resolve({ code: 200, msg: '成功', data: item });
-              }
+              db.run(sql, (error: any, data: any) => {
+                if (error) {
+                  reject({ code: 400, msg: error });
+                } else {
+                  db.get(inquire, (err: any, item: any) => {
+                    if (err) {
+                      reject({ code: 400, msg: err, data: [] });
+                    } else {
+                      if (!item) {
+                        resolve({ code: 201, msg: '没有查到code', data: item });
+                      } else {
+                        resolve({ code: 200, msg: '成功', data: item });
+                      }
+                    }
+                  });
+                }
+              });
             }
-          });
-        }
-      });
+          }
+        },
+      );
     });
   },
   setCurrent(params: any) {
-    const { id } = params;
+    const { name } = params;
     const db = conDb();
     return new Promise((resolve, reject) => {
       const inquire = `select * from category_table where current = "1"`;
       const sql1 = `UPDATE category_table SET current = "2"`;
-      const sql2 = `UPDATE category_table SET current = "1" WHERE id = "${id}"`;
+      const sql2 = `UPDATE category_table SET current = "1" WHERE name = "${name}"`;
       db.run(sql1, (err1: any, data1: any) => {
         if (err1) {
           reject({ code: 400, msg: err1 });

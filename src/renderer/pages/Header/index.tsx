@@ -28,21 +28,19 @@ export default function HeaderCom() {
     const opt = resp.data?.map((item: any) => {
       return {
         label: item.name,
-        value: item.id,
+        value: item.name,
       };
     });
     if (resp.data.length) {
       const cur: any = resp.data.filter(
         (item: any) => item.current === '1',
       )?.[0];
-      const categoryCurrent = cur
-        ? `${cur?.name}_${cur?.id}`
-        : `${resp.data[0]?.name}_${resp.data[0]?.id}`;
+      const categoryCurrent = cur ? cur?.name : resp.data[0]?.name;
       localStorage.setItem('category_current', categoryCurrent);
       setCurrentCategory(cur || resp.data[0]);
       setCategoryOption(opt);
       form.setFieldsValue({
-        name: cur?.id || resp.data[0]?.id,
+        name: cur?.name || resp.data[0]?.name,
       });
     }
   };
@@ -51,11 +49,11 @@ export default function HeaderCom() {
     const resp = await window.electron.ipcRenderer.invoke(
       'set-category-current',
       {
-        id: form.getFieldsValue()?.name,
+        name: form.getFieldsValue()?.name,
       },
     );
     const cur: any = resp.data?.[0];
-    const categoryCurrent = cur && `${cur?.name}_${cur?.id}`;
+    const categoryCurrent = cur?.name;
     localStorage.setItem('category_current', categoryCurrent);
     setCurrentCategory(cur);
     setShowCategoryChooseModal(false);
