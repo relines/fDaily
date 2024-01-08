@@ -132,7 +132,11 @@ export default function HeaderCom() {
         title="分类设置"
         open={showCategorySetModal}
         width={750}
-        onOk={() => {}}
+        okText="确定"
+        cancelText="取消"
+        onOk={() => {
+          setShowCategorySetModal(false);
+        }}
         onCancel={() => setShowCategorySetModal(false)}
       >
         <CategorySet />

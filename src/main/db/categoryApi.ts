@@ -32,7 +32,7 @@ export default {
       });
     });
   },
-  addData({ name, remark, sort, current }: any) {
+  addData({ name, remark, sort, category }: any) {
     const db = conDb();
 
     const createTime = new Date().getTime();
@@ -54,10 +54,10 @@ export default {
                     reject({ code: 400, msg: err2, data: [] });
                   } else {
                     if (list2.length) {
-                      resolve({ code: 201, msg: 'sort repeat', data: list });
+                      resolve({ code: 201, msg: 'sort repeat', data: list2 });
                     } else {
                       db.run(
-                        `INSERT INTO category_table (name, remark, sort, current, createTime) values ("${name}", "${remark}", "${sort}", "${current}", "${createTime}")`,
+                        `INSERT INTO category_table (name, remark, sort, category, createTime) values ("${name}", "${remark}", "${sort}", "${category}", "${createTime}")`,
                         (error: any, data: any) => {
                           if (error) {
                             reject({ code: 400, msg: error });

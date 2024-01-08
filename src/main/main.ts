@@ -109,6 +109,9 @@ const createWindow = async () => {
     ? path.join(process.resourcesPath, 'assets')
     : path.join(__dirname, '../../assets');
 
+  console.log(333, process.resourcesPath);
+  console.log(331, __dirname);
+
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
   };

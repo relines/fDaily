@@ -35,6 +35,7 @@ export default function Index(props: Iprops) {
     setLoading(true);
     await window.electron.ipcRenderer.invoke('add-data', {
       content: '',
+      category: localStorage.getItem('category_current'),
       tag: 'default',
     });
     setLoading(false);
